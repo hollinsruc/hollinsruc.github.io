@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>hollins</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://hollins.me/"/>
+  <updated>2016-12-23T02:24:29.895Z</updated>
+  <id>http://hollins.me/</id>
+  
+  <author>
+    <name>Rod Hollins</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>解决Cannot change version of project facet Dynamic Web Module to 3.1</title>
+    <link href="http://hollins.me/2016/12/23/change-dynamic-web-model/"/>
+    <id>http://hollins.me/2016/12/23/change-dynamic-web-model/</id>
+    <published>2016-12-23T01:56:09.000Z</published>
+    <updated>2016-12-23T02:24:29.895Z</updated>
+    
+    <content type="html"><![CDATA[<p>笔者在使用Spring Tool Suite 创建maven项目时，选择了Artifact Id为maven-artchetype-webapp，由于STS本身的配置还没更新，导致Project Facets中的Dynamic Web Model是2.3版本的。如果尝试直接将2.3修改至3.1，将会导致报错</p>
+<blockquote>
+<p>Cannot change version of project facet Dynamic web module to 3.1</p>
+</blockquote>
+<a id="more"></a>
+<p>网上看了许多解决方案，有人是直接修改org.eclipse.wst.common.project.facet.core.xml，但严格来说，这文件并不能算maven项目的一部分。因此，笔者尝试用更合理的方法解决Dynamic Web Module的问题，顺便解决JRE System Library 1.5的问题。</p>
+<h2 id="去掉Dynamic-Web-Module的选项的对勾"><a href="#去掉Dynamic-Web-Module的选项的对勾" class="headerlink" title="去掉Dynamic Web Module的选项的对勾"></a>去掉Dynamic Web Module的选项的对勾</h2><p>如图所示<br><img src="/img/dwm.jpg" alt="去掉Dynamic Web Module的选项的对勾"><br>然后点击 Apply按钮即可</p>
+<h2 id="配置web-xml文件"><a href="#配置web-xml文件" class="headerlink" title="配置web.xml文件"></a>配置web.xml文件</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span></span></div><div class="line">         <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://xmlns.jcp.org/xml/ns/javaee"</span> </div><div class="line">         <span class="attr">xmlns:web</span>=<span class="string">"http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"</span></div><div class="line">         <span class="attr">version</span>=<span class="string">"3.1"</span> <span class="attr">xmlns</span>=<span class="string">"http://xmlns.jcp.org/xml/ns/javaee"</span>&gt;</div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></div></pre></td></tr></table></figure>
+<h2 id="配置maven"><a href="#配置maven" class="headerlink" title="配置maven"></a>配置maven</h2><h3 id="修改servlet-api的dependency"><a href="#修改servlet-api的dependency" class="headerlink" title="修改servlet api的dependency"></a>修改servlet api的dependency</h3><p>注意<code>version</code>设置为<code>3.1.0</code>以及<code>scope</code>设为<code>provided</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="新增plugin"><a href="#新增plugin" class="headerlink" title="新增plugin"></a>新增plugin</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="更新项目"><a href="#更新项目" class="headerlink" title="更新项目"></a>更新项目</h3><p>在完成上述配置后，右击project，选择Maven-&gt;Update Project 或直接按快捷键 Alt+F5 更新项目配置。结果如下图所示：<br><img src="/img/dwm3.1.jpg" alt="最终的Dynamic Web Model"></p>
+<p>大功搞成！</p>
+<hr>
+<p>参考：<a href="http://stackoverflow.com/questions/19661135/dynamic-web-module-3-0-3-1#answer-24961969" target="_blank" rel="external">stackoverflow</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;笔者在使用Spring Tool Suite 创建maven项目时，选择了Artifact Id为maven-artchetype-webapp，由于STS本身的配置还没更新，导致Project Facets中的Dynamic Web Model是2.3版本的。如果尝试直接将2.3修改至3.1，将会导致报错&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Cannot change version of project facet Dynamic web module to 3.1&lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    </summary>
+    
+      <category term="Java" scheme="http://hollins.me/categories/Java/"/>
+    
+    
+      <category term="Eclipse" scheme="http://hollins.me/tags/Eclipse/"/>
+    
+      <category term="Spring" scheme="http://hollins.me/tags/Spring/"/>
+    
+      <category term="Maven" scheme="http://hollins.me/tags/Maven/"/>
+    
+      <category term="Spring MVC" scheme="http://hollins.me/tags/Spring-MVC/"/>
+    
+      <category term="Dynamic Web Module" scheme="http://hollins.me/tags/Dynamic-Web-Module/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Ubuntu扁平化主题——Flatabulous</title>
+    <link href="http://hollins.me/2016/04/03/Ubuntu%E6%89%81%E5%B9%B3%E5%8C%96%E4%B8%BB%E9%A2%98%E2%80%94%E2%80%94abulous/"/>
+    <id>http://hollins.me/2016/04/03/Ubuntu扁平化主题——abulous/</id>
+    <published>2016-04-03T15:28:21.000Z</published>
+    <updated>2016-04-09T16:08:39.477Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="/img/Flatabulous1.png" alt="Flatabulous的logo"><br>笔者前两天在重装Ubuntu的时候，无意中发现了这款精美的主题。于是，毫不吝啬地推荐给大家。<br><a id="more"></a></p>
+<h1 id="Flatabulous"><a href="#Flatabulous" class="headerlink" title="Flatabulous"></a>Flatabulous</h1><p>这是一款为Ubuntu等Linux系统制作的扁平化主题，主要基于Ultra-Flat主题。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>这款主题是专门为Ubuntu上unity环境设计的，而且笔者已经在个人的电脑上进行了测试，表现出色。当然，可能在其他版本的Linux系统中也可以运行。<br><img src="/img/terminal.png" alt="控制台截图"></p>
+<h2 id="终端"><a href="#终端" class="headerlink" title="终端"></a>终端</h2><p>原作者提到要安装<a href="http://ubuntu-tweak.com/" target="_blank" rel="external">Ubuntu tweak tool</a></p>
+<blockquote>
+<p>To install the theme, you must first install the <strong>Ubuntu tweak tool</strong></p>
+</blockquote>
+<p>值得注意的是，<a href="http://ubuntu-tweak.com/" target="_blank" rel="external">Ubuntu tweak tool</a>是为Ubuntu 13.10及以前的版本准备的。</p>
+<p>如果您的Ubuntu属于上述版本，那么在终端中输入以下命令即可安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sudo add-apt-repository ppa:tualatrix/ppa</div><div class="line">$ sudo apt-get update</div><div class="line">$ sudo apt-get install ubuntu-tweak</div></pre></td></tr></table></figure></p>
+<p>或者也可以去Ubuntu tweak tool官网下载.deb文件</p>
+<p>那对于Ubuntu 13.10发行以后的版本改怎么办呢？自然有简单粗暴的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install unity-tweak-tool</div></pre></td></tr></table></figure></p>
+<h2 id="主题资源"><a href="#主题资源" class="headerlink" title="主题资源"></a>主题资源</h2><p>该项目已托管在Github上，可以前往<a href="https://github.com/anmoljagetia/Flatabulous" target="_blank" rel="external">项目主页</a>或者点击<a href="https://github.com/anmoljagetia/Flatabulous/archive/master.zip" target="_blank" rel="external">此处</a>下载主题资源。</p>
+<p>然后将文件解压并且移动到/usr/share/themes/ 目录下</p>
+<h1 id="扁平图标"><a href="#扁平图标" class="headerlink" title="扁平图标"></a>扁平图标</h1><p><img src="/img/dashboard.png" alt="Dashboard"><br>在图标方面，我使用ultra-flat-icons主题。它包括了蓝色(推荐)，橙色和薄荷绿三种颜色。您可以在终端中输入一下命令已安装它。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sudo add-apt-repository ppa:noobslab/icons</div><div class="line">$ sudo apt-get update</div><div class="line">$ sudo apt-get install ultra-flat-icons</div></pre></td></tr></table></figure></p>
+<p>另外，你可以可以使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install ultra-flat-icons-orange</div></pre></td></tr></table></figure></p>
+<p>和<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install ultra-flat-icons-green</div></pre></td></tr></table></figure></p>
+<p>来安装其他两种颜色的图标。</p>
+<h1 id="使用主题"><a href="#使用主题" class="headerlink" title="使用主题"></a>使用主题</h1><p>现在按下<strong>Super</strong>键，进入Dashboard，搜索Ubuntu Tweak (或者Unity Tweak tool)并运行该程序。</p>
+<p>以<strong>Unity Tweak Tool</strong> 为例，在外观选项卡中有一个”主题”选项，选择”<strong>Flatabulous-master</strong>主题。在”图标”选项中，选择”<strong>Ultra-flat</strong>“图标。</p>
+<p>最后，重启电脑。你的电脑将会变得和下面一样：</p>
+<h1 id="屏幕截图"><a href="#屏幕截图" class="headerlink" title="屏幕截图"></a>屏幕截图</h1><p><img src="/img/sublime.png" alt="Sublime Text python code"><br><img src="/img/folder.png" alt="文件夹"><br><img src="/img/syssettings.png" alt="系统设置"></p>
+<h1 id="桌面背景"><a href="#桌面背景" class="headerlink" title="桌面背景"></a>桌面背景</h1><p><img src="/img/Space-Desktop.jpg" alt="桌面背景图"></p>
+<hr>
+<p>原文地址：<a href="https://github.com/anmoljagetia/Flatabulous" target="_blank" rel="external">Flatabulous</a></p>
+<p>桌面背景来自：<a href="https://plus.google.com/+JaromBradshaw/posts/FFnhcPqVaCc?pid=6001488417862207826&amp;oid=115581491412616658975" target="_blank" rel="external">Jarom Bradshaw的Google+</a></p>
+<p>文章略有改动。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      作为初学者，我一度对Ubuntu其貌不扬的界面感到不是。直到有一天，我发现了一款精美的系统主题——Flatabulous。
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://hollins.me/categories/Linux/"/>
+    
+    
+      <category term="Ubuntu" scheme="http://hollins.me/tags/Ubuntu/"/>
+    
+      <category term="Theme" scheme="http://hollins.me/tags/Theme/"/>
+    
+      <category term="扁平化" scheme="http://hollins.me/tags/%E6%89%81%E5%B9%B3%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算是给自己一个发声的机会吧</title>
+    <link href="http://hollins.me/2016/03/16/%E7%AE%97%E6%98%AF%E7%BB%99%E8%87%AA%E5%B7%B1%E4%B8%80%E4%B8%AA%E5%8F%91%E5%A3%B0%E7%9A%84%E6%9C%BA%E4%BC%9A%E5%90%A7/"/>
+    <id>http://hollins.me/2016/03/16/算是给自己一个发声的机会吧/</id>
+    <published>2016-03-15T16:39:43.000Z</published>
+    <updated>2016-04-04T16:13:35.017Z</updated>
+    
+    <content type="html"><![CDATA[<p>在朋友圈表露心情抑或想法，从来都不是我的初衷。</p>
+<p>从今天开始，准确地说，是2016年3月15日(没错，白色情人节后一天，请忽略单身狗的无奈)，我开始鼓捣在github上搭建一个自己的博客——一是满足自己写点东西的私欲，二是可以记录下日常学习收获，三是可以将自己在技术上的见解分享给大家。<br><a id="more"></a><br>我不是一个演说家。所以，在这里，你极少能看到激情澎湃的文字，简单朴素才是这里的常态。嗯，我崇尚简单。</p>
+<p>今天饶有兴致地观看了一部AV(American Video)《火星救援》。剧中，男主人公被困火星，每天坚持用摄像头记录心情，以供后人发现。于我而言，我宁愿将自己的点滴跳跃在键盘上，存入博客里，供日后的自己回溯。</p>
+<p>以上。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      在朋友圈表露心情抑或想法，从来都不是我的初衷。那就开个博客吧。
+    
+    </summary>
+    
+    
+      <category term="博客" scheme="http://hollins.me/tags/%E5%8D%9A%E5%AE%A2/"/>
+    
+      <category term="心情" scheme="http://hollins.me/tags/%E5%BF%83%E6%83%85/"/>
+    
+  </entry>
+  
+</feed>
